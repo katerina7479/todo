@@ -1,0 +1,29 @@
+
+{% extends "base.html" %}
+{% block title %}To Do List{% endblock %}
+{% block header %}To Do's{% endblock %}
+
+{% block content %}
+
+{% for item in items %}
+		<div class="ui blue segment item">
+			{{ item }}
+		</div>
+{% endfor %}
+<div id="add" class="ui button hover">Add</div>
+
+
+{% endblock %}
+
+{% block footer %}
+    <script>
+      $(function() {
+	      $('#add').on('click', function(){
+			  alert("Clicked!");
+		  });
+		  $('.item').on('click', function(){
+		      alert("clicked list");
+	      });
+	  });
+    </script>
+{% endblock %}

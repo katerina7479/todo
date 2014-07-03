@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>{% block title %}{% endblock %}</title>
+	<link rel="stylesheet" href="/static/css/normalize.css">
+    <link rel="stylesheet" href="/static/css/semantic.css" />
+    <script src="/static/js/vendor/modernizr.js"></script>
+	{% block head %}{% endblock %}
+  </head>
+  <body>
+    <div class="ui grid">
+      <div class="six wide column">
+	  </div>
+	  <div class="ten wide column">
+        <h1 class="ui header">{% block header %}{% endblock %}
+		</h1>
+      </div>
+    </div>
+	<div class="ui grid">
+	  <div class="four wide column">
+	  </div>
+	  <div class="eight wide column">
+		<div id="main">
+		{% block content %}
+		{% endblock %}
+	    </div>
+      </div>
+	  <div class="four wide column">
+	  </div>
+	</div>
+    <script src="/static/js/vendor/jquery.js"></script>
+    <script src="/static/js/semantic.min.js"></script>
+	{% block footer %}
+    <script>
+      $(function() {});
+    </script>
+    {% endblock %}
+  </body>
+</html>
