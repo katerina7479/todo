@@ -1,35 +1,28 @@
-vagrant_ubuntu14_shell
+Todo
 ======================
 
-Virtual development environment, with no virtualenv required.
-You can deploy your project to other providers by changing the 
-Vagrantfile. No puppet, no chef, just simple shell scripts.
+With Flask, SqlAlchemy, Semantic-UI
+-----------------------------------
 
-On Host computer, it requires Vagrant, Virtualbox, Git, and a good internet connection.
-Simply clone this repo, cd to the Vagrantfile, and do:
+This is a demo site showing one way to use Flask to make a website.
+I used a SqlAlchemy non-declarative model, and simple sqlite test db.
+Semantic-UI for the front-end CSS
+HTML rendered server-side with the Jinja2 template engine.
+Vagrant upload, you can start the website starts with:
 
-`> vagrant up`
+`> vagrant up
+ ? (enter password at prompt)
+ > vagrant ssh
+ > cd projects/todoapp
+ > python application.py
+`
+** Requires Virtualbox, Vagrant, & Git **
 
-Vagrant will build a virtualbox virtual machine, with ubuntu trusty 14.04. It installs
-git, pip, and uses pip to install anything you've defined in requirements.txt. It may 
-take longer the first time, but after, will store the base box, so the second will not 
-be as slow.
 
-To access do:
-
-`> vagrant ssh`
-
-Your shared folder is in the "home\vagrant\projects" folder. You can use your text editor on your host computer to
-make changes, and run your program in the virtual env. 
-
-If you install things through pip, do:
-
-`> pip freeze > requirements.txt`
-
-And it will install next time.
-
-If you want to throw it away, do:
-
-`> vagrant destroy`
-
-Look at the [vagrant docs](https://docs.vagrantup.com/v2/) for more information.
+References at:
+ 
+ * [Flask](http://flask.pocoo.org/docs/)
+ * [Sqlalchemy in Flask](http://flask.pocoo.org/docs/patterns/sqlalchemy/#manual-object-relational-mapping)
+ * [Jinja2](http://jinja.pocoo.org/docs/templates/)
+ * [Semantic-ui](http://semantic-ui.com/element.html)
+ * [Vagrant](https://docs.vagrantup.com/v2/)
