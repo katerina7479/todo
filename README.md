@@ -10,12 +10,14 @@ Semantic-UI for the front-end CSS
 HTML rendered server-side with the Jinja2 template engine.
 Vagrant upload, you can start the website starts with:
 
-`> vagrant up
+```
+ > vagrant up
  ? (enter password at prompt)
  > vagrant ssh
  > cd projects/todoapp
  > python application.py
-`
+```
+
 ** Requires Virtualbox, Vagrant, & Git **
 
 
