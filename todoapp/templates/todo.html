@@ -8,7 +8,7 @@
 		<div  class="field">
 			<label>Todo Item</label>
 			<div class="ui left labeled icon input">
-			  <input id="todo" type="text" placeholder="Todo">
+			  <input id="todo" type="text" placeholder="Todo" value="{{ item.title }}">
 			  <i class="tasks icon"></i>
 			  <div class="ui corner label">
 				<i class="icon asterisk"></i>
@@ -17,10 +17,10 @@
 		</div>
 		<div  class="field">
 			<label>Notes</label>
-			<textarea id="notes"></textarea>
+			<textarea id="notes">{{ item.description }}</textarea>
 		</div>
 		<div id="done" class="ui checkbox">
-			<input type="checkbox" name="done">
+			<input type="checkbox" name="done" {% if item.done %} checked="true" {% endif %}>
 			<label>Done</label>
 		</div>
 	</div>
@@ -62,8 +62,8 @@
 			  done: form.form('get field', 'done').prop('checked')
 		  };
 		  console.log(formData);
-		  $.ajax({ type: 'POST', url: '/todo/', data: formData, success: function onFormSubmitted() {
-		  //window.location = '/';
+		  $.ajax({ type: 'POST', url: '/todo/{{ item. id }}', data: formData, success: function onFormSubmitted() {
+		  	window.location = '/';
 		} });
 		}
 	  });

@@ -7,8 +7,11 @@
 
 <div id="add" class="ui green button hover">Add</div>
 {% for item in items %}
-		<div class="ui blue segment item">
-			{{ item }}
+		<div class="ui blue segment item" data-value="{{ item.id }}">
+			{{ item.title }}
+			{% if item.done == 1 %}
+			<i class="large green check icon"></i>
+			{% endif %}
 		</div>
 {% endfor %}
 
@@ -22,8 +25,11 @@
 	      $('#add').on('click', function(){
 			  window.location = "/todo/";
 		  });
-		  $('.item').on('click', function(){
-		      alert("clicked list");
+		  $('.item').on('click', function(e){
+			  var row = $(e.target).closest('div');
+			  //row.addClass("selected");
+			  var row_id = row.data("value");
+			  window.location = "/todo/" + row_id;
 	      });
 	  });
     </script>
