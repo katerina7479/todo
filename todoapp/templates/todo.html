@@ -3,69 +3,63 @@
 {% block header %}To Do{% endblock %}
 
 {% block content %}
-<div class="ui form">
-	<div class="ui blue segment">
-		<div  class="field">
-			<label>Todo Item</label>
-			<div class="ui left labeled icon input">
-			  <input id="todo" type="text" placeholder="Todo" value="{{ item.title }}">
-			  <i class="tasks icon"></i>
-			  <div class="ui corner label">
-				<i class="icon asterisk"></i>
-			  </div>
-			</div>
-		</div>
-		<div  class="field">
-			<label>Notes</label>
-			<textarea id="notes">{{ item.description }}</textarea>
-		</div>
-		<div id="done" class="ui checkbox">
-			<input type="checkbox" name="done" {% if item.done %} checked="true" {% endif %}>
-			<label>Done</label>
-		</div>
-	</div>
+  <div class="ui form">
+    <div class="ui blue segment">
+      <div  class="field">
+        <label>Todo Item</label>
+        <div class="ui left labeled icon input">
+          <input id="todo" type="text" placeholder="Todo" value="{{ item.title }}">
+          <i class="tasks icon"></i>
+          <div class="ui corner label">
+            <i class="icon asterisk"></i>
+          </div>
+        </div>
+      </div>
+      <div  class="field">
+        <label for="notes">Notes</label>
+        <textarea id="notes">{{ item.description }}</textarea>
+      </div>
+      <div id="done" class="ui checkbox">
+        <input type="checkbox" name="done" {% if item.done %} checked="true" {% endif %}>
+        <label for="done">Done</label>
+      </div>
+    </div>
 
-	<div id="submit" class="ui green button submit hover">Ok</div>
-	<div id="cancel" class="ui red button hover">Cancel</div>
-</div>
-
+    <div id="submit" class="ui green button submit hover">Ok</div>
+    <div id="cancel" class="ui red button hover">Cancel</div>
+  </div>
 {% endblock %}
 
 {% block footer %}
-    <script>
-      $(function() {
-	      $('#cancel').on('click', function(e){
-			  e.preventDefault();
-			  window.location = "/";
-		  });
+  <script>
+    $(function() {
+      $('#cancel').on('click', function(e){
+        e.preventDefault();
+        window.location = "/";
+      });
 
-		$('.ui.checkbox').checkbox();
+      $('.ui.checkbox').checkbox();
 
-		//Initialize & set validation rules & settings
-		$('.ui.form').form({todo: {
-      		  identifier  : 'todo',
-			  rules: [
-				{
-				  type   : 'empty',
-				  prompt : 'Please enter your todo item'
-				}
-			  ]
-    		}}, {on: blur, 'inline': true, onSuccess: submitForm });
+      //Initialize & set validation rules & settings
+      $('.ui.form').form({todo: {identifier  : 'todo',
+                                 rules: [{type   : 'empty',
+                                          prompt : 'Please enter your todo item'
+                                         }]}},
+                         {on: blur, 'inline': true, onSuccess: submitForm });
 
-		//Submit form callback
-		  function submitForm(event) {
-		    console.log("Submitting");
-		    var form = $('.ui.form');
-		    var formData = {
-			  todo: form.form('get field', 'todo').val(),
-			  notes: form.form('get field', 'notes').val(),
-			  done: form.form('get field', 'done').prop('checked')
-		  };
-		  console.log(formData);
-		  $.ajax({ type: 'POST', url: '/todo/{{ item. id }}', data: formData, success: function onFormSubmitted() {
-		  	window.location = '/';
-		} });
-		}
-	  });
-    </script>
+      //Submit form callback
+      function submitForm(event) {
+        var form = $('.ui.form');
+        var formData = {
+          todo: form.form('get field', 'todo').val(),
+          notes: form.form('get field', 'notes').val(),
+          done: form.form('get field', 'done').prop('checked')
+        };
+
+        $.ajax({ type: 'POST', url: '/todo/{{ item. id }}', data: formData, success: function onFormSubmitted() {
+        window.location = '/';
+        }});
+      }
+    });
+  </script>
 {% endblock %}

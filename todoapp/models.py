@@ -13,11 +13,11 @@ class Todo(object):
     def __repr__(self):
         return '<Todo %r>' % (self.title)
 
-todos = Table('todo', metadata,
-    Column('id', Integer, primary_key=True),
-    Column('title', String(50), unique=True),
-    Column('description', String(120)),
-	Column('done', Boolean())
-)
+todo_table = Table('todo', metadata,
+                   Column('id', Integer, primary_key=True),
+                   Column('title', String(50), unique=True),
+                   Column('description', String(120)),
+                   Column('done', Boolean)
+                   )
 
-mapper(Todo, todos)
+mapper(Todo, todo_table)
