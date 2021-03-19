@@ -1,7 +1,7 @@
 Cheetah==2.4.4
 Flask==0.10.1
 Flask-SQLAlchemy==1.0
-Jinja2==2.7.3
+Jinja2==2.11.3
 Landscape-Client==14.01
 MarkupSafe==0.23
 PAM==0.4.2
