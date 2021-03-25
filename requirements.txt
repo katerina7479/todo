@@ -5,7 +5,7 @@ Jinja2==2.7.3
 Landscape-Client==14.01
 MarkupSafe==0.23
 PAM==0.4.2
-PyYAML==3.10
+PyYAML==5.4
 SQLAlchemy==0.9.6
 SecretStorage==2.0.0
 Twisted-Core==13.2.0
