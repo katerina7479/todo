@@ -26,7 +26,7 @@ def load_todos() -> list[dict]:
     return _load_raw()["todos"]
 
 
-def add_todo(title: str) -> dict:
+def add_todo(title: str, due_date: Optional[str] = None) -> dict:
     data = _load_raw()
     todo = {
         "id": data["next_id"],
@@ -34,6 +34,8 @@ def add_todo(title: str) -> dict:
         "done": False,
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
+    if due_date is not None:
+        todo["due_date"] = due_date
     data["todos"].append(todo)
     data["next_id"] += 1
     _save_raw(data)

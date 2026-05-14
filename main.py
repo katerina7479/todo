@@ -15,7 +15,14 @@ def cmd_add(args: argparse.Namespace) -> int:
     except ValueError as e:
         print(f"Error: {e}", file=sys.stderr)
         return 1
-    item = todo.add_todo(title)
+    due_date = None
+    if args.due_date:
+        try:
+            due_date = validator.validate_due_date(args.due_date)
+        except ValueError as e:
+            print(f"Error: {e}", file=sys.stderr)
+            return 1
+    item = todo.add_todo(title, due_date=due_date)
     print(f"Added: {formatter.format_todo(item)}")
     return 0
 
@@ -128,6 +135,10 @@ def build_parser() -> argparse.ArgumentParser:
     # add
     p_add = sub.add_parser("add", help="Add a new todo item.")
     p_add.add_argument("title", nargs="+", help="Title of the todo item.")
+    p_add.add_argument(
+        "--due-date", dest="due_date", default=None, metavar="DATE",
+        help="Due date: 'tomorrow', 'next friday', 'in 3 days', or YYYY-MM-DD.",
+    )
     p_add.set_defaults(func=cmd_add)
 
     # list
