@@ -5,6 +5,7 @@ import argparse
 import sys
 
 import formatter
+import repl
 import todo
 import validator
 
@@ -77,6 +78,11 @@ def cmd_show(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_interactive(args: argparse.Namespace) -> int:
+    repl.run_repl()
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="todo",
@@ -124,6 +130,10 @@ def build_parser() -> argparse.ArgumentParser:
     p_search = sub.add_parser("search", help="Search todos by title or tag.")
     p_search.add_argument("query", help="Substring to search for (case-insensitive).")
     p_search.set_defaults(func=cmd_search)
+
+    # interactive
+    p_interactive = sub.add_parser("interactive", help="Enter interactive REPL mode.")
+    p_interactive.set_defaults(func=cmd_interactive)
 
     return parser
 
