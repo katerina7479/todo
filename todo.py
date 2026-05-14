@@ -72,3 +72,31 @@ def delete_todo(todo_id: int) -> dict:
             _save_raw(data)
             return removed
     raise KeyError(f"Todo #{todo_id} not found.")
+
+
+_SENTINEL = object()
+
+
+def update_todo(
+    todo_id: int,
+    *,
+    title: object = _SENTINEL,
+    priority: object = _SENTINEL,
+    due_date: object = _SENTINEL,
+    tags: object = _SENTINEL,
+) -> dict:
+    """Partial update — only fields passed (not _SENTINEL) are changed."""
+    data = _load_raw()
+    for todo in data["todos"]:
+        if todo["id"] == todo_id:
+            if title is not _SENTINEL:
+                todo["title"] = title
+            if priority is not _SENTINEL:
+                todo["priority"] = priority
+            if due_date is not _SENTINEL:
+                todo["due_date"] = due_date
+            if tags is not _SENTINEL:
+                todo["tags"] = tags
+            _save_raw(data)
+            return todo
+    raise KeyError(f"Todo #{todo_id} not found.")

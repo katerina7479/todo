@@ -56,6 +56,53 @@ def cmd_delete(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_edit(args: argparse.Namespace) -> int:
+    try:
+        todo_id = validator.validate_id(args.id)
+    except ValueError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
+
+    kwargs: dict = {}
+    if args.title is not None:
+        try:
+            kwargs["title"] = validator.validate_title(" ".join(args.title))
+        except ValueError as e:
+            print(f"Error: {e}", file=sys.stderr)
+            return 1
+    if args.priority is not None:
+        try:
+            kwargs["priority"] = validator.validate_priority(args.priority)
+        except ValueError as e:
+            print(f"Error: {e}", file=sys.stderr)
+            return 1
+    if args.due_date is not None:
+        try:
+            kwargs["due_date"] = validator.validate_due_date(args.due_date)
+        except ValueError as e:
+            print(f"Error: {e}", file=sys.stderr)
+            return 1
+    if args.tags is not None:
+        try:
+            kwargs["tags"] = validator.validate_tags(args.tags)
+        except ValueError as e:
+            print(f"Error: {e}", file=sys.stderr)
+            return 1
+
+    if not kwargs:
+        print("Error: at least one field to update must be specified.", file=sys.stderr)
+        return 1
+
+    try:
+        item = todo.update_todo(todo_id, **kwargs)
+    except KeyError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
+
+    print(f"Updated: {formatter.format_todo(item)}")
+    return 0
+
+
 def cmd_show(args: argparse.Namespace) -> int:
     try:
         todo_id = validator.validate_id(args.id)
@@ -99,6 +146,15 @@ def build_parser() -> argparse.ArgumentParser:
     p_del = sub.add_parser("delete", help="Delete a todo item.")
     p_del.add_argument("id", help="ID of the todo to delete.")
     p_del.set_defaults(func=cmd_delete)
+
+    # edit
+    p_edit = sub.add_parser("edit", help="Modify an existing todo item.")
+    p_edit.add_argument("id", help="ID of the todo to edit.")
+    p_edit.add_argument("--title", nargs="+", default=None, help="New title.")
+    p_edit.add_argument("--priority", default=None, metavar="1-4", help="Priority (1=highest).")
+    p_edit.add_argument("--due-date", dest="due_date", default=None, metavar="YYYY-MM-DD", help="Due date.")
+    p_edit.add_argument("--tags", default=None, metavar="tag1,tag2", help="Comma-separated tags.")
+    p_edit.set_defaults(func=cmd_edit)
 
     # show
     p_show = sub.add_parser("show", help="Show detail for a todo item.")

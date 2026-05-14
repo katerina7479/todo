@@ -29,9 +29,12 @@ def format_todo_list(todos: list[dict]) -> str:
 def format_todo_detail(todo: dict) -> str:
     """Multi-line detail view for a single todo."""
     lines = [
-        f"ID:      {todo['id']}",
-        f"Title:   {todo['title']}",
-        f"Status:  {'done' if todo['done'] else 'pending'}",
-        f"Created: {_created_label(todo)}",
+        f"ID:       {todo['id']}",
+        f"Title:    {todo['title']}",
+        f"Status:   {'done' if todo['done'] else 'pending'}",
+        f"Priority: {todo.get('priority', '-')}",
+        f"Due:      {todo.get('due_date', '-')}",
+        f"Tags:     {', '.join(todo['tags']) if todo.get('tags') else '-'}",
+        f"Created:  {_created_label(todo)}",
     ]
     return "\n".join(lines)
