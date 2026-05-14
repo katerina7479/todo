@@ -60,3 +60,7 @@ docs/_build/
 
 # Vagrant
 .vagrant/*
+
+# Virtual environments
+venv/
+.venv/
