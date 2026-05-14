@@ -6,8 +6,17 @@
   <div id="add" class="ui green button hover">Add
   </div>
   {% for item in items %}
-    <div class="ui blue segment item" data-value="{{ item.id }}">
+    {% if item.due_date and item.due_date < today %}
+      <div class="ui red segment item" data-value="{{ item.id }}">
+    {% else %}
+      <div class="ui blue segment item" data-value="{{ item.id }}">
+    {% endif %}
       {{ item.title }}
+      {% if item.due_date %}
+        <span class="ui {% if item.due_date < today %}red{% else %}grey{% endif %} text">
+          &nbsp;Due: {{ item.due_date.strftime('%Y-%m-%d') }}
+        </span>
+      {% endif %}
       {% if item.done == 1 %}
         <i class="large green check icon"></i>
       {% endif %}
