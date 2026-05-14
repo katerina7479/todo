@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "todo-cli"
+version = "0.1.0"
+description = "A simple command-line todo manager."
+requires-python = ">=3.9"
+dependencies = []
+
+[project.scripts]
+todo = "main:main"
+
+[tool.setuptools]
+py-modules = ["config", "formatter", "main", "todo", "validator"]
