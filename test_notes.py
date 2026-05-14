@@ -61,7 +61,7 @@ class TestUpdateNotes(NotesBase):
         self.assertEqual(todo_module.get_todo(1)["notes"], "New notes.")
 
     def test_update_missing_id_raises(self):
-        with self.assertRaises(KeyError):
+        with self.assertRaises(ValueError):
             todo_module.update_notes(99, "Anything")
 
     def test_update_clears_notes_with_empty_string(self):
