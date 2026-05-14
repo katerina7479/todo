@@ -19,6 +19,11 @@
         <label for="notes">Notes</label>
         <textarea id="notes">{{ item.description }}</textarea>
       </div>
+      <div class="field">
+        <label for="due_date">Due Date</label>
+        <input id="due_date" type="date" name="due_date"
+               value="{% if item.due_date %}{{ item.due_date.strftime('%Y-%m-%d') if item.due_date is not none else '' }}{% endif %}">
+      </div>
       <div id="done" class="ui checkbox">
         <input type="checkbox" name="done" {% if item.done %} checked="true" {% endif %}>
         <label for="done">Done</label>
@@ -53,7 +58,8 @@
         var formData = {
           todo: form.form('get field', 'todo').val(),
           notes: form.form('get field', 'notes').val(),
-          done: form.form('get field', 'done').prop('checked')
+          done: form.form('get field', 'done').prop('checked'),
+          due_date: $('#due_date').val()
         };
 
         $.ajax({ type: 'POST', url: '/todo/{{ item. id }}', data: formData, success: function onFormSubmitted() {
