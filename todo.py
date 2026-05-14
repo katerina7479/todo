@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
-from config import get_storage_path
+from config import get_archive_path, get_storage_path
 
 
 def _load_raw() -> dict:
@@ -18,6 +18,20 @@ def _load_raw() -> dict:
 
 def _save_raw(data: dict) -> None:
     path = get_storage_path()
+    with path.open("w") as f:
+        json.dump(data, f, indent=2)
+
+
+def _load_archive() -> dict:
+    path = get_archive_path()
+    if not path.exists():
+        return {"todos": []}
+    with path.open() as f:
+        return json.load(f)
+
+
+def _save_archive(data: dict) -> None:
+    path = get_archive_path()
     with path.open("w") as f:
         json.dump(data, f, indent=2)
 
@@ -48,19 +62,51 @@ def get_todo(todo_id: int) -> Optional[dict]:
     return None
 
 
-def list_todos(show_done: bool = False, tag: Optional[str] = None) -> list[dict]:
+def load_archived() -> list[dict]:
+    return _load_archive()["todos"]
+
+
+def archive_done() -> int:
+    """Move all done todos from the active store to the archive. Returns count moved."""
+    data = _load_raw()
+    done = [t for t in data["todos"] if t["done"]]
+    if not done:
+        return 0
+    for t in done:
+        t["archived"] = True
+    archive = _load_archive()
+    archive["todos"].extend(done)
+    _save_archive(archive)
+    data["todos"] = [t for t in data["todos"] if not t["done"]]
+    _save_raw(data)
+    return len(done)
+
+
+def list_todos(
+    show_done: bool = False,
+    tag: Optional[str] = None,
+    include_archived: bool = False,
+) -> list[dict]:
     todos = load_todos()
     if not show_done:
         todos = [t for t in todos if not t["done"]]
     if tag:
         todos = [t for t in todos if tag in t.get("tags", [])]
+    if include_archived:
+        archived = load_archived()
+        if tag:
+            archived = [t for t in archived if tag in t.get("tags", [])]
+        todos = todos + archived
     return todos
 
 
-def search_todos(query: str) -> list[dict]:
+def search_todos(query: str, include_archived: bool = False) -> list[dict]:
     q = query.lower()
+    sources = load_todos()
+    if include_archived:
+        sources = sources + load_archived()
     results = []
-    for todo in load_todos():
+    for todo in sources:
         if q in todo["title"].lower():
             results.append(todo)
             continue

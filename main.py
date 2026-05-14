@@ -21,8 +21,21 @@ def cmd_add(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_archive(args: argparse.Namespace) -> int:
+    count = todo.archive_done()
+    if count == 0:
+        print("No completed todos to archive.")
+    else:
+        print(f"Archived {count} completed todo{'s' if count != 1 else ''}.")
+    return 0
+
+
 def cmd_list(args: argparse.Namespace) -> int:
-    items = todo.list_todos(show_done=args.all, tag=args.tag)
+    items = todo.list_todos(
+        show_done=args.all,
+        tag=args.tag,
+        include_archived=args.include_archived,
+    )
     print(formatter.format_todo_list(items))
     return 0
 
@@ -58,7 +71,7 @@ def cmd_delete(args: argparse.Namespace) -> int:
 
 
 def cmd_search(args: argparse.Namespace) -> int:
-    items = todo.search_todos(args.query)
+    items = todo.search_todos(args.query, include_archived=args.include_archived)
     print(formatter.format_todo_list(items))
     return 0
 
@@ -103,6 +116,10 @@ def build_parser() -> argparse.ArgumentParser:
         "--tag", metavar="TAG",
         help="Filter to todos that have this tag.",
     )
+    p_list.add_argument(
+        "--include-archived", action="store_true",
+        help="Include archived todos in the output.",
+    )
     p_list.set_defaults(func=cmd_list)
 
     # done
@@ -123,7 +140,15 @@ def build_parser() -> argparse.ArgumentParser:
     # search
     p_search = sub.add_parser("search", help="Search todos by title or tag.")
     p_search.add_argument("query", help="Substring to search for (case-insensitive).")
+    p_search.add_argument(
+        "--include-archived", action="store_true",
+        help="Include archived todos in search results.",
+    )
     p_search.set_defaults(func=cmd_search)
+
+    # archive
+    p_archive = sub.add_parser("archive", help="Move completed todos to the archive.")
+    p_archive.set_defaults(func=cmd_archive)
 
     return parser
 
