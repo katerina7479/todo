@@ -15,9 +15,14 @@ def _created_label(todo: dict) -> str:
         return "unknown"
 
 
+def _tags_label(todo: dict) -> str:
+    tags = todo.get("tags", [])
+    return f"  [{', '.join(tags)}]" if tags else ""
+
+
 def format_todo(todo: dict) -> str:
-    """Single-line summary: '[x] #1  Buy milk'"""
-    return f"[{_status_char(todo)}] #{todo['id']:<4} {todo['title']}"
+    """Single-line summary: '[x] #1  Buy milk  [tag1, tag2]'"""
+    return f"[{_status_char(todo)}] #{todo['id']:<4} {todo['title']}{_tags_label(todo)}"
 
 
 def format_todo_list(todos: list[dict]) -> str:
@@ -28,10 +33,12 @@ def format_todo_list(todos: list[dict]) -> str:
 
 def format_todo_detail(todo: dict) -> str:
     """Multi-line detail view for a single todo."""
+    tags = todo.get("tags", [])
     lines = [
         f"ID:      {todo['id']}",
         f"Title:   {todo['title']}",
         f"Status:  {'done' if todo['done'] else 'pending'}",
         f"Created: {_created_label(todo)}",
+        f"Tags:    {', '.join(tags) if tags else '(none)'}",
     ]
     return "\n".join(lines)

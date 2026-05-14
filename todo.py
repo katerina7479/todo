@@ -26,13 +26,14 @@ def load_todos() -> list[dict]:
     return _load_raw()["todos"]
 
 
-def add_todo(title: str) -> dict:
+def add_todo(title: str, tags: Optional[list[str]] = None) -> dict:
     data = _load_raw()
     todo = {
         "id": data["next_id"],
         "title": title,
         "done": False,
         "created_at": datetime.now(timezone.utc).isoformat(),
+        "tags": tags or [],
     }
     data["todos"].append(todo)
     data["next_id"] += 1
@@ -47,10 +48,12 @@ def get_todo(todo_id: int) -> Optional[dict]:
     return None
 
 
-def list_todos(show_done: bool = False) -> list[dict]:
+def list_todos(show_done: bool = False, tag: Optional[str] = None) -> list[dict]:
     todos = load_todos()
     if not show_done:
         todos = [t for t in todos if not t["done"]]
+    if tag:
+        todos = [t for t in todos if tag in t.get("tags", [])]
     return todos
 
 

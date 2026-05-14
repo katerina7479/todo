@@ -9,6 +9,14 @@ def validate_title(title: str) -> str:
     return stripped
 
 
+def validate_tags(raw_tags: str) -> list[str]:
+    """Parse comma-separated tags, stripping whitespace. Returns empty list for blank input."""
+    if not raw_tags or not raw_tags.strip():
+        return []
+    tags = [t.strip() for t in raw_tags.split(",")]
+    return [t for t in tags if t]
+
+
 def validate_id(raw_id: str) -> int:
     """Return integer id, raising ValueError if not a positive integer."""
     try:

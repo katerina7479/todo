@@ -12,16 +12,17 @@ import validator
 def cmd_add(args: argparse.Namespace) -> int:
     try:
         title = validator.validate_title(" ".join(args.title))
+        tags = validator.validate_tags(args.tags or "")
     except ValueError as e:
         print(f"Error: {e}", file=sys.stderr)
         return 1
-    item = todo.add_todo(title)
+    item = todo.add_todo(title, tags=tags)
     print(f"Added: {formatter.format_todo(item)}")
     return 0
 
 
 def cmd_list(args: argparse.Namespace) -> int:
-    items = todo.list_todos(show_done=args.all)
+    items = todo.list_todos(show_done=args.all, tag=args.tag)
     print(formatter.format_todo_list(items))
     return 0
 
@@ -81,12 +82,20 @@ def build_parser() -> argparse.ArgumentParser:
     # add
     p_add = sub.add_parser("add", help="Add a new todo item.")
     p_add.add_argument("title", nargs="+", help="Title of the todo item.")
+    p_add.add_argument(
+        "--tags", metavar="TAGS",
+        help="Comma-separated tags (e.g. 'work,urgent').",
+    )
     p_add.set_defaults(func=cmd_add)
 
     # list
     p_list = sub.add_parser("list", help="List todo items.")
     p_list.add_argument(
         "--all", action="store_true", help="Include completed todos."
+    )
+    p_list.add_argument(
+        "--tag", metavar="TAG",
+        help="Filter to todos that have this tag.",
     )
     p_list.set_defaults(func=cmd_list)
 
