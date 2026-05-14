@@ -100,8 +100,8 @@ class TestMarkDone:
         todo.mark_done(t["id"])
         assert todo.get_todo(t["id"])["done"] is True
 
-    def test_not_found_raises_key_error(self):
-        with pytest.raises(KeyError):
+    def test_not_found_raises_value_error(self):
+        with pytest.raises(ValueError):
             todo.mark_done(999)
 
     def test_does_not_affect_other_items(self):
@@ -122,8 +122,8 @@ class TestDeleteTodo:
         todo.delete_todo(t["id"])
         assert todo.get_todo(t["id"]) is None
 
-    def test_not_found_raises_key_error(self):
-        with pytest.raises(KeyError):
+    def test_not_found_raises_value_error(self):
+        with pytest.raises(ValueError):
             todo.delete_todo(999)
 
     def test_does_not_affect_other_items(self):
