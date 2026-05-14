@@ -3,8 +3,10 @@
 
 import argparse
 import sys
+from pathlib import Path
 
 import formatter
+import importexport
 import todo
 import validator
 
@@ -77,6 +79,32 @@ def cmd_show(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_export(args: argparse.Namespace) -> int:
+    path = Path(args.file)
+    try:
+        count = importexport.export_todos(path, fmt=args.format)
+    except (OSError, ValueError) as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
+    fmt = args.format or path.suffix.lstrip(".") or "json"
+    print(f"Exported {count} todo(s) to {path} ({fmt})")
+    return 0
+
+
+def cmd_import(args: argparse.Namespace) -> int:
+    path = Path(args.file)
+    if not path.exists():
+        print(f"Error: File not found: {path}", file=sys.stderr)
+        return 1
+    try:
+        imported, skipped = importexport.import_todos(path, fmt=args.format)
+    except (OSError, ValueError) as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
+    print(f"Imported {imported} todo(s), skipped {skipped} duplicate(s).")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="todo",
@@ -124,6 +152,24 @@ def build_parser() -> argparse.ArgumentParser:
     p_search = sub.add_parser("search", help="Search todos by title or tag.")
     p_search.add_argument("query", help="Substring to search for (case-insensitive).")
     p_search.set_defaults(func=cmd_search)
+
+    # export
+    p_export = sub.add_parser("export", help="Export all todos to a JSON or CSV file.")
+    p_export.add_argument("file", help="Destination file path.")
+    p_export.add_argument(
+        "--format", choices=["json", "csv"], metavar="FORMAT",
+        help="Output format: json or csv (default: inferred from file extension).",
+    )
+    p_export.set_defaults(func=cmd_export)
+
+    # import
+    p_import = sub.add_parser("import", help="Import todos from a JSON or CSV file.")
+    p_import.add_argument("file", help="Source file path.")
+    p_import.add_argument(
+        "--format", choices=["json", "csv"], metavar="FORMAT",
+        help="File format: json or csv (default: inferred from file extension).",
+    )
+    p_import.set_defaults(func=cmd_import)
 
     return parser
 
