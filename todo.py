@@ -34,7 +34,7 @@ def add_todo(
     data = _load_raw()
     if parent_id is not None:
         if not any(t["id"] == parent_id for t in data["todos"]):
-            raise KeyError(f"Parent todo #{parent_id} not found.")
+            raise ValueError(f"Parent todo #{parent_id} not found.")
     todo = {
         "id": data["next_id"],
         "title": title,
@@ -117,7 +117,7 @@ def mark_done(todo_id: int) -> dict:
     data = _load_raw()
     target = next((t for t in data["todos"] if t["id"] == todo_id), None)
     if target is None:
-        raise KeyError(f"Todo #{todo_id} not found.")
+        raise ValueError(f"Todo #{todo_id} not found.")
     ids_to_mark = _collect_subtree_ids(data["todos"], todo_id)
     for todo in data["todos"]:
         if todo["id"] in ids_to_mark:
@@ -133,4 +133,4 @@ def delete_todo(todo_id: int) -> dict:
             removed = data["todos"].pop(i)
             _save_raw(data)
             return removed
-    raise KeyError(f"Todo #{todo_id} not found.")
+    raise ValueError(f"Todo #{todo_id} not found.")

@@ -19,7 +19,7 @@ def cmd_add(args: argparse.Namespace) -> int:
         return 1
     try:
         item = todo.add_todo(title, tags=tags, parent_id=parent_id)
-    except KeyError as e:
+    except ValueError as e:
         print(f"Error: {e}", file=sys.stderr)
         return 1
     print(f"Added: {formatter.format_todo(item)}")
@@ -40,7 +40,7 @@ def cmd_done(args: argparse.Namespace) -> int:
         return 1
     try:
         item = todo.mark_done(todo_id)
-    except KeyError as e:
+    except ValueError as e:
         print(f"Error: {e}", file=sys.stderr)
         return 1
     print(f"Marked done: {formatter.format_todo(item)}")
@@ -55,7 +55,7 @@ def cmd_delete(args: argparse.Namespace) -> int:
         return 1
     try:
         item = todo.delete_todo(todo_id)
-    except KeyError as e:
+    except ValueError as e:
         print(f"Error: {e}", file=sys.stderr)
         return 1
     print(f"Deleted: {formatter.format_todo(item)}")

@@ -23,7 +23,7 @@ class TestAddTodoWithParent:
         assert child["parent_id"] == parent["id"]
 
     def test_add_subtask_with_invalid_parent_raises(self):
-        with pytest.raises(KeyError, match="not found"):
+        with pytest.raises(ValueError, match="not found"):
             todo.add_todo("Orphan", parent_id=999)
 
     def test_subtask_persists_parent_id(self):
@@ -134,7 +134,7 @@ class TestMarkDoneCascades:
         assert todo.get_todo(c2["id"])["done"] is False
 
     def test_mark_done_nonexistent_raises(self):
-        with pytest.raises(KeyError):
+        with pytest.raises(ValueError):
             todo.mark_done(999)
 
 
