@@ -1,6 +1,6 @@
 """Terminal output formatting for todo items."""
 
-from datetime import datetime, timezone
+from datetime import datetime
 
 
 def _status_char(todo: dict) -> str:
