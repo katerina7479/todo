@@ -1,1 +1,6 @@
 .company_town/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.venv/
