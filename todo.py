@@ -26,7 +26,7 @@ def load_todos() -> list[dict]:
     return _load_raw()["todos"]
 
 
-def add_todo(title: str, tags: Optional[list[str]] = None) -> dict:
+def add_todo(title: str, tags: Optional[list[str]] = None, notes: str = "") -> dict:
     data = _load_raw()
     todo = {
         "id": data["next_id"],
@@ -34,6 +34,7 @@ def add_todo(title: str, tags: Optional[list[str]] = None) -> dict:
         "done": False,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "tags": tags or [],
+        "notes": notes,
     }
     data["todos"].append(todo)
     data["next_id"] += 1
@@ -74,6 +75,16 @@ def mark_done(todo_id: int) -> dict:
     for todo in data["todos"]:
         if todo["id"] == todo_id:
             todo["done"] = True
+            _save_raw(data)
+            return todo
+    raise KeyError(f"Todo #{todo_id} not found.")
+
+
+def update_notes(todo_id: int, notes: str) -> dict:
+    data = _load_raw()
+    for todo in data["todos"]:
+        if todo["id"] == todo_id:
+            todo["notes"] = notes
             _save_raw(data)
             return todo
     raise KeyError(f"Todo #{todo_id} not found.")

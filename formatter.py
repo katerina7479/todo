@@ -34,6 +34,7 @@ def format_todo_list(todos: list[dict]) -> str:
 def format_todo_detail(todo: dict) -> str:
     """Multi-line detail view for a single todo."""
     tags = todo.get("tags", [])
+    notes = todo.get("notes", "").strip()
     lines = [
         f"ID:      {todo['id']}",
         f"Title:   {todo['title']}",
@@ -41,4 +42,6 @@ def format_todo_detail(todo: dict) -> str:
         f"Created: {_created_label(todo)}",
         f"Tags:    {', '.join(tags) if tags else '(none)'}",
     ]
+    if notes:
+        lines.append(f"Notes:\n{notes}")
     return "\n".join(lines)

@@ -2,8 +2,10 @@
 """Todo CLI — entry point."""
 
 import argparse
+import subprocess
 import sys
 
+import editor
 import formatter
 import todo
 import validator
@@ -16,7 +18,14 @@ def cmd_add(args: argparse.Namespace) -> int:
     except ValueError as e:
         print(f"Error: {e}", file=sys.stderr)
         return 1
-    item = todo.add_todo(title, tags=tags)
+    notes = ""
+    if args.notes:
+        try:
+            notes = editor.open_editor()
+        except (OSError, subprocess.SubprocessError) as e:
+            print(f"Error opening editor: {e}", file=sys.stderr)
+            return 1
+    item = todo.add_todo(title, tags=tags, notes=notes)
     print(f"Added: {formatter.format_todo(item)}")
     return 0
 
@@ -77,6 +86,33 @@ def cmd_show(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_edit(args: argparse.Namespace) -> int:
+    try:
+        todo_id = validator.validate_id(args.id)
+    except ValueError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
+    if not args.notes:
+        print("Error: specify --notes to edit the notes field.", file=sys.stderr)
+        return 1
+    item = todo.get_todo(todo_id)
+    if item is None:
+        print(f"Error: Todo #{todo_id} not found.", file=sys.stderr)
+        return 1
+    try:
+        notes = editor.open_editor(initial=item.get("notes", ""))
+    except (OSError, subprocess.SubprocessError) as e:
+        print(f"Error opening editor: {e}", file=sys.stderr)
+        return 1
+    try:
+        updated = todo.update_notes(todo_id, notes)
+    except KeyError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
+    print(f"Updated: {formatter.format_todo(updated)}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="todo",
@@ -91,6 +127,10 @@ def build_parser() -> argparse.ArgumentParser:
     p_add.add_argument(
         "--tags", metavar="TAGS",
         help="Comma-separated tags (e.g. 'work,urgent').",
+    )
+    p_add.add_argument(
+        "--notes", action="store_true",
+        help="Open $EDITOR to write multi-line notes for this todo.",
     )
     p_add.set_defaults(func=cmd_add)
 
@@ -124,6 +164,15 @@ def build_parser() -> argparse.ArgumentParser:
     p_search = sub.add_parser("search", help="Search todos by title or tag.")
     p_search.add_argument("query", help="Substring to search for (case-insensitive).")
     p_search.set_defaults(func=cmd_search)
+
+    # edit
+    p_edit = sub.add_parser("edit", help="Edit fields of an existing todo.")
+    p_edit.add_argument("id", help="ID of the todo to edit.")
+    p_edit.add_argument(
+        "--notes", action="store_true",
+        help="Open $EDITOR to update the notes for this todo.",
+    )
+    p_edit.set_defaults(func=cmd_edit)
 
     return parser
 
