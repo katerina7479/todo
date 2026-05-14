@@ -31,6 +31,18 @@ def format_todo_list(todos: list[dict]) -> str:
     return "\n".join(format_todo(t) for t in todos)
 
 
+def format_todo_groups(groups: list[tuple[str, list[dict]]]) -> str:
+    """Format grouped todos with a section header per group."""
+    if not groups:
+        return "No todos found."
+    sections = []
+    for label, todos in groups:
+        header = f"=== {label} ==="
+        body = "\n".join(format_todo(t) for t in todos)
+        sections.append(f"{header}\n{body}")
+    return "\n\n".join(sections)
+
+
 def format_todo_detail(todo: dict) -> str:
     """Multi-line detail view for a single todo."""
     tags = todo.get("tags", [])

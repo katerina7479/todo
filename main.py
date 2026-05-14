@@ -23,7 +23,13 @@ def cmd_add(args: argparse.Namespace) -> int:
 
 def cmd_list(args: argparse.Namespace) -> int:
     items = todo.list_todos(show_done=args.all, tag=args.tag)
-    print(formatter.format_todo_list(items))
+    if args.sort_by:
+        items = todo.sort_todos(items, args.sort_by)
+    if args.group_by:
+        groups = todo.group_todos(items, args.group_by)
+        print(formatter.format_todo_groups(groups))
+    else:
+        print(formatter.format_todo_list(items))
     return 0
 
 
@@ -102,6 +108,18 @@ def build_parser() -> argparse.ArgumentParser:
     p_list.add_argument(
         "--tag", metavar="TAG",
         help="Filter to todos that have this tag.",
+    )
+    p_list.add_argument(
+        "--sort-by",
+        choices=["priority", "due_date", "created_at", "title"],
+        metavar="FIELD",
+        help="Sort by field: priority, due_date, created_at, or title.",
+    )
+    p_list.add_argument(
+        "--group-by",
+        choices=["tag", "priority", "due_date"],
+        metavar="FIELD",
+        help="Group by field: tag, priority, or due_date. Prints section headers.",
     )
     p_list.set_defaults(func=cmd_list)
 

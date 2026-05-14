@@ -57,6 +57,45 @@ def list_todos(show_done: bool = False, tag: Optional[str] = None) -> list[dict]
     return todos
 
 
+_SORT_SENTINEL = "\xff"  # sorts after all printable strings
+
+
+def sort_todos(todos: list[dict], sort_by: str) -> list[dict]:
+    """Return a new list sorted by *sort_by* field. Missing values sort last."""
+    if sort_by == "title":
+        key = lambda t: t.get("title", "").lower()
+    elif sort_by == "created_at":
+        key = lambda t: t.get("created_at") or _SORT_SENTINEL
+    else:
+        key = lambda t: t.get(sort_by) or _SORT_SENTINEL
+    return sorted(todos, key=key)
+
+
+def group_todos(todos: list[dict], group_by: str) -> list[tuple[str, list[dict]]]:
+    """Return [(label, [todos])] groups, sorted by label. Missing values → '(none)'.
+
+    For group_by='tag' each todo appears under every tag it carries; untagged
+    todos appear under '(no tag)'.
+    """
+    buckets: dict[str, list[dict]] = {}
+
+    if group_by == "tag":
+        for t in todos:
+            tags = t.get("tags", [])
+            if not tags:
+                buckets.setdefault("(no tag)", []).append(t)
+            else:
+                for tag in tags:
+                    buckets.setdefault(tag, []).append(t)
+    else:
+        for t in todos:
+            val = t.get(group_by)
+            label = str(val) if val is not None else "(none)"
+            buckets.setdefault(label, []).append(t)
+
+    return sorted(buckets.items(), key=lambda kv: kv[0])
+
+
 def search_todos(query: str) -> list[dict]:
     q = query.lower()
     results = []
