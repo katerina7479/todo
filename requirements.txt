@@ -37,6 +37,7 @@ pyserial==2.6
 python-apt==0.9.3.5
 python-debian==0.1.21-nmu2ubuntu2
 requests==2.2.1
+rich>=13.0.0
 simplejson==3.3.1
 six==1.5.2
 ssh-import-id==3.21
