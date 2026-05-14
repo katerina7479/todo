@@ -35,6 +35,7 @@ pycurl==7.19.3
 pygobject==3.12.0
 pyserial==2.6
 python-apt==0.9.3.5
+python-dateutil>=2.8
 python-debian==0.1.21-nmu2ubuntu2
 requests==2.2.1
 simplejson==3.3.1
