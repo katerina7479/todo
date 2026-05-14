@@ -1,34 +1,20 @@
-import re
-from datetime import datetime
-
-
-MAX_TITLE_LENGTH = 200
-VALID_PRIORITIES = {"low", "medium", "high"}
+"""Input validation for the todo CLI."""
 
 
 def validate_title(title: str) -> str:
-    if not isinstance(title, str):
-        raise TypeError("Title must be a string")
-    title = title.strip()
-    if not title:
-        raise ValueError("Title cannot be empty")
-    if len(title) > MAX_TITLE_LENGTH:
-        raise ValueError(f"Title cannot exceed {MAX_TITLE_LENGTH} characters")
-    return title
+    """Return stripped title, raising ValueError if blank."""
+    stripped = title.strip()
+    if not stripped:
+        raise ValueError("Todo title cannot be empty.")
+    return stripped
 
 
-def validate_priority(priority: str) -> str:
-    if not isinstance(priority, str):
-        raise TypeError("Priority must be a string")
-    priority = priority.strip().lower()
-    if priority not in VALID_PRIORITIES:
-        raise ValueError(f"Priority must be one of: {', '.join(sorted(VALID_PRIORITIES))}")
-    return priority
-
-
-def validate_todo_id(todo_id: int) -> int:
-    if not isinstance(todo_id, int):
-        raise TypeError("Todo ID must be an integer")
+def validate_id(raw_id: str) -> int:
+    """Return integer id, raising ValueError if not a positive integer."""
+    try:
+        todo_id = int(raw_id)
+    except (TypeError, ValueError):
+        raise ValueError(f"Invalid id '{raw_id}': must be a positive integer.")
     if todo_id < 1:
-        raise ValueError("Todo ID must be a positive integer")
+        raise ValueError(f"Invalid id '{raw_id}': must be a positive integer.")
     return todo_id

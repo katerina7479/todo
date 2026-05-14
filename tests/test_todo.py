@@ -1,154 +1,139 @@
-import json
 import pytest
-from pathlib import Path
 
-from config import Config
-from todo import Todo, TodoStore
+import todo
 
 
-@pytest.fixture
-def store(tmp_path):
-    config = Config(storage_path=tmp_path / "todos.json")
-    return TodoStore(config)
+@pytest.fixture(autouse=True)
+def isolate_storage(tmp_path, monkeypatch):
+    monkeypatch.setenv("TODO_FILE", str(tmp_path / "todos.json"))
 
 
-class TestTodo:
-    def test_defaults(self):
-        todo = Todo(title="Write tests", id=1)
-        assert todo.done is False
-        assert todo.priority == "medium"
-        assert todo.created_at is not None
+class TestAddTodo:
+    def test_returns_dict(self):
+        item = todo.add_todo("Buy milk")
+        assert isinstance(item, dict)
 
-    def test_to_dict_round_trip(self):
-        todo = Todo(id=5, title="Buy milk", done=True, priority="high")
-        restored = Todo.from_dict(todo.to_dict())
-        assert restored.id == todo.id
-        assert restored.title == todo.title
-        assert restored.done == todo.done
-        assert restored.priority == todo.priority
-        assert restored.created_at == todo.created_at
+    def test_title_set(self):
+        item = todo.add_todo("Buy milk")
+        assert item["title"] == "Buy milk"
 
-    def test_from_dict_uses_defaults_for_missing_keys(self):
-        todo = Todo.from_dict({"id": 1, "title": "Test"})
-        assert todo.done is False
-        assert todo.priority == "medium"
-        assert todo.created_at is not None
+    def test_done_is_false(self):
+        item = todo.add_todo("Buy milk")
+        assert item["done"] is False
 
+    def test_id_starts_at_one(self):
+        item = todo.add_todo("First")
+        assert item["id"] == 1
 
-class TestTodoStoreAdd:
-    def test_add_creates_todo(self, store):
-        todo = store.add("Write tests")
-        assert todo.id == 1
-        assert todo.title == "Write tests"
-        assert todo.done is False
+    def test_ids_increment(self):
+        t1 = todo.add_todo("First")
+        t2 = todo.add_todo("Second")
+        assert t2["id"] == t1["id"] + 1
 
-    def test_add_increments_id(self, store):
-        t1 = store.add("First")
-        t2 = store.add("Second")
-        assert t2.id == t1.id + 1
+    def test_created_at_present(self):
+        item = todo.add_todo("Buy milk")
+        assert "created_at" in item
 
-    def test_add_persists_to_file(self, store):
-        store.add("Persisted todo")
-        assert store.config.storage_path.exists()
-
-    def test_add_with_priority(self, store):
-        todo = store.add("High priority", priority="high")
-        assert todo.priority == "high"
-
-    def test_add_multiple_todos(self, store):
-        for i in range(5):
-            store.add(f"Todo {i}")
-        todos = store.list(show_done=True)
-        assert len(todos) == 5
+    def test_persists_to_file(self, tmp_path):
+        todo.add_todo("Persisted")
+        assert (tmp_path / "todos.json").exists()
 
 
-class TestTodoStoreList:
-    def test_list_empty_store(self, store):
-        assert store.list() == []
+class TestListTodos:
+    def test_empty_store_returns_empty_list(self):
+        assert todo.list_todos() == []
 
-    def test_list_returns_pending_only_by_default(self, store):
-        store.add("Pending")
-        todo = store.add("Done")
-        store.complete(todo.id)
-        pending = store.list()
-        assert len(pending) == 1
-        assert pending[0].title == "Pending"
+    def test_returns_pending_by_default(self):
+        todo.add_todo("Pending")
+        items = todo.list_todos()
+        assert len(items) == 1
 
-    def test_list_show_done_includes_all(self, store):
-        store.add("Pending")
-        todo = store.add("Done")
-        store.complete(todo.id)
-        all_todos = store.list(show_done=True)
-        assert len(all_todos) == 2
+    def test_excludes_done_by_default(self):
+        t = todo.add_todo("Done item")
+        todo.mark_done(t["id"])
+        assert todo.list_todos() == []
 
-    def test_list_no_file_returns_empty(self, store):
-        assert not store.config.storage_path.exists()
-        assert store.list() == []
+    def test_show_done_includes_completed(self):
+        t = todo.add_todo("Done item")
+        todo.mark_done(t["id"])
+        assert len(todo.list_todos(show_done=True)) == 1
+
+    def test_show_done_includes_all(self):
+        todo.add_todo("Pending")
+        t = todo.add_todo("Done")
+        todo.mark_done(t["id"])
+        assert len(todo.list_todos(show_done=True)) == 2
+
+    def test_returns_list_of_dicts(self):
+        todo.add_todo("Item")
+        items = todo.list_todos()
+        assert isinstance(items, list)
+        assert isinstance(items[0], dict)
 
 
-class TestTodoStoreGet:
-    def test_get_existing_todo(self, store):
-        added = store.add("Findable")
-        found = store.get(added.id)
+class TestGetTodo:
+    def test_returns_correct_todo(self):
+        added = todo.add_todo("Findable")
+        found = todo.get_todo(added["id"])
         assert found is not None
-        assert found.title == "Findable"
+        assert found["title"] == "Findable"
 
-    def test_get_nonexistent_returns_none(self, store):
-        assert store.get(999) is None
+    def test_nonexistent_returns_none(self):
+        assert todo.get_todo(999) is None
 
-    def test_get_returns_correct_todo(self, store):
-        store.add("First")
-        second = store.add("Second")
-        store.add("Third")
-        found = store.get(second.id)
-        assert found.title == "Second"
-
-
-class TestTodoStoreComplete:
-    def test_complete_marks_done(self, store):
-        todo = store.add("Finish me")
-        result = store.complete(todo.id)
-        assert result is not None
-        assert result.done is True
-
-    def test_complete_persists(self, store):
-        todo = store.add("Finish me")
-        store.complete(todo.id)
-        reloaded = store.get(todo.id)
-        assert reloaded.done is True
-
-    def test_complete_nonexistent_returns_none(self, store):
-        assert store.complete(999) is None
-
-    def test_complete_does_not_affect_others(self, store):
-        t1 = store.add("First")
-        t2 = store.add("Second")
-        store.complete(t1.id)
-        assert store.get(t2.id).done is False
+    def test_returns_correct_item_among_multiple(self):
+        todo.add_todo("First")
+        second = todo.add_todo("Second")
+        todo.add_todo("Third")
+        found = todo.get_todo(second["id"])
+        assert found["title"] == "Second"
 
 
-class TestTodoStoreDelete:
-    def test_delete_existing_returns_true(self, store):
-        todo = store.add("Delete me")
-        assert store.delete(todo.id) is True
+class TestMarkDone:
+    def test_sets_done_true(self):
+        t = todo.add_todo("Finish me")
+        result = todo.mark_done(t["id"])
+        assert result["done"] is True
 
-    def test_delete_removes_from_list(self, store):
-        todo = store.add("Delete me")
-        store.delete(todo.id)
-        assert store.get(todo.id) is None
+    def test_persists(self):
+        t = todo.add_todo("Finish me")
+        todo.mark_done(t["id"])
+        assert todo.get_todo(t["id"])["done"] is True
 
-    def test_delete_nonexistent_returns_false(self, store):
-        assert store.delete(999) is False
+    def test_not_found_raises_key_error(self):
+        with pytest.raises(KeyError):
+            todo.mark_done(999)
 
-    def test_delete_does_not_affect_others(self, store):
-        t1 = store.add("Keep")
-        t2 = store.add("Delete me")
-        store.delete(t2.id)
-        assert store.get(t1.id) is not None
-        assert store.list(show_done=True) == [store.get(t1.id)]
+    def test_does_not_affect_other_items(self):
+        t1 = todo.add_todo("First")
+        t2 = todo.add_todo("Second")
+        todo.mark_done(t1["id"])
+        assert todo.get_todo(t2["id"])["done"] is False
 
-    def test_delete_then_add_id_does_not_reuse(self, store):
-        t1 = store.add("First")
-        store.delete(t1.id)
-        t2 = store.add("Second")
-        assert t2.id > t1.id
+
+class TestDeleteTodo:
+    def test_returns_deleted_item(self):
+        t = todo.add_todo("Delete me")
+        removed = todo.delete_todo(t["id"])
+        assert removed["title"] == "Delete me"
+
+    def test_removes_from_store(self):
+        t = todo.add_todo("Delete me")
+        todo.delete_todo(t["id"])
+        assert todo.get_todo(t["id"]) is None
+
+    def test_not_found_raises_key_error(self):
+        with pytest.raises(KeyError):
+            todo.delete_todo(999)
+
+    def test_does_not_affect_other_items(self):
+        t1 = todo.add_todo("Keep")
+        t2 = todo.add_todo("Delete me")
+        todo.delete_todo(t2["id"])
+        assert todo.get_todo(t1["id"]) is not None
+
+    def test_ids_not_reused_after_delete(self):
+        t1 = todo.add_todo("First")
+        todo.delete_todo(t1["id"])
+        t2 = todo.add_todo("Second")
+        assert t2["id"] > t1["id"]
