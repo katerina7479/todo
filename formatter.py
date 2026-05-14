@@ -20,15 +20,20 @@ def _tags_label(todo: dict) -> str:
     return f"  [{', '.join(tags)}]" if tags else ""
 
 
-def format_todo(todo: dict) -> str:
+def format_todo(todo: dict, indent: int = 0) -> str:
     """Single-line summary: '[x] #1  Buy milk  [tag1, tag2]'"""
-    return f"[{_status_char(todo)}] #{todo['id']:<4} {todo['title']}{_tags_label(todo)}"
+    prefix = "  " * indent
+    return f"[{_status_char(todo)}] {prefix}#{todo['id']:<4} {todo['title']}{_tags_label(todo)}"
 
 
 def format_todo_list(todos: list[dict]) -> str:
     if not todos:
         return "No todos found."
-    return "\n".join(format_todo(t) for t in todos)
+    lines = []
+    for t in todos:
+        indent = 1 if t.get("parent_id") is not None else 0
+        lines.append(format_todo(t, indent=indent))
+    return "\n".join(lines)
 
 
 def format_todo_detail(todo: dict) -> str:
@@ -41,4 +46,6 @@ def format_todo_detail(todo: dict) -> str:
         f"Created: {_created_label(todo)}",
         f"Tags:    {', '.join(tags) if tags else '(none)'}",
     ]
+    if todo.get("parent_id") is not None:
+        lines.insert(2, f"Parent:  #{todo['parent_id']}")
     return "\n".join(lines)

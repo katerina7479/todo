@@ -13,10 +13,15 @@ def cmd_add(args: argparse.Namespace) -> int:
     try:
         title = validator.validate_title(" ".join(args.title))
         tags = validator.validate_tags(args.tags or "")
+        parent_id = validator.validate_id(args.parent) if args.parent else None
     except ValueError as e:
         print(f"Error: {e}", file=sys.stderr)
         return 1
-    item = todo.add_todo(title, tags=tags)
+    try:
+        item = todo.add_todo(title, tags=tags, parent_id=parent_id)
+    except KeyError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
     print(f"Added: {formatter.format_todo(item)}")
     return 0
 
@@ -91,6 +96,10 @@ def build_parser() -> argparse.ArgumentParser:
     p_add.add_argument(
         "--tags", metavar="TAGS",
         help="Comma-separated tags (e.g. 'work,urgent').",
+    )
+    p_add.add_argument(
+        "--parent", metavar="ID",
+        help="ID of the parent todo (creates a subtask).",
     )
     p_add.set_defaults(func=cmd_add)
 
