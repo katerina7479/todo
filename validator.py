@@ -2,7 +2,7 @@
 
 from datetime import date
 
-VALID_PRIORITIES = {"1", "2", "3", "4"}
+VALID_PRIORITIES = {"low", "medium", "high"}
 
 
 def validate_title(title: str) -> str:
@@ -24,11 +24,12 @@ def validate_id(raw_id: str) -> int:
     return todo_id
 
 
-def validate_priority(raw: str) -> int:
-    """Return integer priority 1-4, raising ValueError otherwise."""
-    if raw not in VALID_PRIORITIES:
-        raise ValueError(f"Invalid priority '{raw}': must be 1, 2, 3, or 4.")
-    return int(raw)
+def validate_priority(raw: str) -> str:
+    """Return normalised priority string (low/medium/high), raising ValueError otherwise."""
+    normalised = raw.strip().lower()
+    if normalised not in VALID_PRIORITIES:
+        raise ValueError(f"Invalid priority '{raw}': must be low, medium, or high.")
+    return normalised
 
 
 def validate_due_date(raw: str) -> str:

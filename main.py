@@ -34,7 +34,7 @@ def cmd_done(args: argparse.Namespace) -> int:
         return 1
     try:
         item = todo.mark_done(todo_id)
-    except KeyError as e:
+    except ValueError as e:
         print(f"Error: {e}", file=sys.stderr)
         return 1
     print(f"Marked done: {formatter.format_todo(item)}")
@@ -49,7 +49,7 @@ def cmd_delete(args: argparse.Namespace) -> int:
         return 1
     try:
         item = todo.delete_todo(todo_id)
-    except KeyError as e:
+    except ValueError as e:
         print(f"Error: {e}", file=sys.stderr)
         return 1
     print(f"Deleted: {formatter.format_todo(item)}")
@@ -95,7 +95,7 @@ def cmd_edit(args: argparse.Namespace) -> int:
 
     try:
         item = todo.update_todo(todo_id, **kwargs)
-    except KeyError as e:
+    except ValueError as e:
         print(f"Error: {e}", file=sys.stderr)
         return 1
 
@@ -151,7 +151,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_edit = sub.add_parser("edit", help="Modify an existing todo item.")
     p_edit.add_argument("id", help="ID of the todo to edit.")
     p_edit.add_argument("--title", nargs="+", default=None, help="New title.")
-    p_edit.add_argument("--priority", default=None, metavar="1-4", help="Priority (1=highest).")
+    p_edit.add_argument("--priority", default=None, metavar="low/medium/high", help="Priority level.")
     p_edit.add_argument("--due-date", dest="due_date", default=None, metavar="YYYY-MM-DD", help="Due date.")
     p_edit.add_argument("--tags", default=None, metavar="tag1,tag2", help="Comma-separated tags.")
     p_edit.set_defaults(func=cmd_edit)

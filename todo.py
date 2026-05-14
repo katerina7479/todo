@@ -61,7 +61,7 @@ def mark_done(todo_id: int) -> dict:
             todo["done"] = True
             _save_raw(data)
             return todo
-    raise KeyError(f"Todo #{todo_id} not found.")
+    raise ValueError(f"Todo #{todo_id} not found.")
 
 
 def delete_todo(todo_id: int) -> dict:
@@ -71,7 +71,7 @@ def delete_todo(todo_id: int) -> dict:
             removed = data["todos"].pop(i)
             _save_raw(data)
             return removed
-    raise KeyError(f"Todo #{todo_id} not found.")
+    raise ValueError(f"Todo #{todo_id} not found.")
 
 
 _SENTINEL = object()
@@ -99,4 +99,4 @@ def update_todo(
                 todo["tags"] = tags
             _save_raw(data)
             return todo
-    raise KeyError(f"Todo #{todo_id} not found.")
+    raise ValueError(f"Todo #{todo_id} not found.")
