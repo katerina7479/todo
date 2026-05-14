@@ -100,7 +100,7 @@ def handle_line(line: str) -> bool:
             return False
         try:
             item = todo.mark_done(todo_id)
-        except (KeyError, ValueError) as e:
+        except ValueError as e:
             print(f"Error: {e}", file=sys.stderr)
             return False
         print(f"Marked done: {formatter.format_todo(item)}")
@@ -117,7 +117,7 @@ def handle_line(line: str) -> bool:
             return False
         try:
             item = todo.delete_todo(todo_id)
-        except (KeyError, ValueError) as e:
+        except ValueError as e:
             print(f"Error: {e}", file=sys.stderr)
             return False
         print(f"Deleted: {formatter.format_todo(item)}")
