@@ -41,7 +41,7 @@ def cmd_done(args: argparse.Namespace) -> int:
         return 1
     try:
         item, next_occurrence = todo.mark_done(todo_id)
-    except KeyError as e:
+    except ValueError as e:
         print(f"Error: {e}", file=sys.stderr)
         return 1
     formatter.print_todo_done(item, next_occurrence)
@@ -56,7 +56,7 @@ def cmd_delete(args: argparse.Namespace) -> int:
         return 1
     try:
         item = todo.delete_todo(todo_id)
-    except KeyError as e:
+    except ValueError as e:
         print(f"Error: {e}", file=sys.stderr)
         return 1
     formatter.print_todo_deleted(item)
