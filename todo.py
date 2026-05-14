@@ -57,6 +57,18 @@ def list_todos(show_done: bool = False, tag: Optional[str] = None) -> list[dict]
     return todos
 
 
+def search_todos(query: str) -> list[dict]:
+    q = query.lower()
+    results = []
+    for todo in load_todos():
+        if q in todo["title"].lower():
+            results.append(todo)
+            continue
+        if any(q in tag.lower() for tag in todo.get("tags", [])):
+            results.append(todo)
+    return results
+
+
 def mark_done(todo_id: int) -> dict:
     data = _load_raw()
     for todo in data["todos"]:

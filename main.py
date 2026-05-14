@@ -57,6 +57,12 @@ def cmd_delete(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_search(args: argparse.Namespace) -> int:
+    items = todo.search_todos(args.query)
+    print(formatter.format_todo_list(items))
+    return 0
+
+
 def cmd_show(args: argparse.Namespace) -> int:
     try:
         todo_id = validator.validate_id(args.id)
@@ -113,6 +119,11 @@ def build_parser() -> argparse.ArgumentParser:
     p_show = sub.add_parser("show", help="Show detail for a todo item.")
     p_show.add_argument("id", help="ID of the todo to show.")
     p_show.set_defaults(func=cmd_show)
+
+    # search
+    p_search = sub.add_parser("search", help="Search todos by title or tag.")
+    p_search.add_argument("query", help="Substring to search for (case-insensitive).")
+    p_search.set_defaults(func=cmd_search)
 
     return parser
 
