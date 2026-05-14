@@ -4,6 +4,7 @@
 import argparse
 import sys
 
+import completions as completions_mod
 import formatter
 import todo
 import validator
@@ -77,6 +78,24 @@ def cmd_show(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_completions(args: argparse.Namespace) -> int:
+    if args.list_ids:
+        print("\n".join(completions_mod.get_ids()))
+        return 0
+    if args.list_tags:
+        print("\n".join(completions_mod.get_tags()))
+        return 0
+    shell = getattr(args, "shell", None)
+    if shell == "bash":
+        print(completions_mod.bash_script())
+    elif shell == "zsh":
+        print(completions_mod.zsh_script())
+    else:
+        print("Error: specify a shell: bash or zsh", file=sys.stderr)
+        return 1
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="todo",
@@ -124,6 +143,25 @@ def build_parser() -> argparse.ArgumentParser:
     p_search = sub.add_parser("search", help="Search todos by title or tag.")
     p_search.add_argument("query", help="Substring to search for (case-insensitive).")
     p_search.set_defaults(func=cmd_search)
+
+    # completions
+    p_comp = sub.add_parser(
+        "completions",
+        help="Output shell completion script (bash or zsh).",
+    )
+    p_comp.add_argument(
+        "shell", nargs="?", choices=["bash", "zsh"],
+        help="Shell to generate completion script for.",
+    )
+    p_comp.add_argument(
+        "--list-ids", action="store_true",
+        help="Print all todo IDs, one per line (used by completion scripts).",
+    )
+    p_comp.add_argument(
+        "--list-tags", action="store_true",
+        help="Print all tag names, one per line (used by completion scripts).",
+    )
+    p_comp.set_defaults(func=cmd_completions)
 
     return parser
 
